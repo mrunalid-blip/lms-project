@@ -1,0 +1,20 @@
+[
+  {
+    "title": "Course Introduction",
+    "description": "Introduction to the course",
+    "videoFile": "C0002.mp4",
+    "duration": 320,
+    "moduleTitle": "Introduction",
+    "lessonNumber": 1,
+    "courseUuid": "206e7761-400f-4162-88fb-9f4e857950e7"
+  },
+  {
+    "title": "Program Structure",
+    "description": "Understanding the program structure",
+    "videoFile": "C0003.mp4",
+    "duration": 410,
+    "moduleTitle": "Introduction",
+    "lessonNumber": 2,
+    "courseUuid": "206e7761-400f-4162-88fb-9f4e857950e7"
+  }
+]
