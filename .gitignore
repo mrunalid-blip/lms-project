@@ -20,3 +20,4 @@ yarn-error.log*
 .DS_Store
 # Ignore uploaded videos
 backend/uploads/videos/
+backend/uploads/videos/
