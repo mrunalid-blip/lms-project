@@ -16,6 +16,8 @@ const bookmarkRoutes = require('./routes/bookmarks');
 const courseRoutes = require('./routes/courses');
 const enrollmentRoutes = require('./routes/enrollments');
 const adminCourseRoutes = require('./routes/adminCourses');
+const adminUserRoutes = require("./routes/adminUsers");
+
 
 
 
@@ -36,6 +38,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ✅ Serve uploaded videos
 app.use(
   '/uploads',
+  (req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+  },
   express.static(path.join(__dirname, 'uploads'))
 );
 
@@ -57,6 +65,8 @@ app.use('/api/notes', noteRoutes);
 app.use('/api/bookmarks', bookmarkRoutes);
 app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api/admin', adminCourseRoutes);
+app.use("/api/admin", adminUserRoutes);
+
 
 
 app.use((req, res) => {

@@ -168,7 +168,14 @@ router.post('/', auth, isAdmin, videoController.createVideo);
  *       200:
  *         description: Video updated
  */
-router.put('/:id', auth, isAdmin, videoController.updateVideo);
+router.put(
+  '/:id',
+  auth,
+  isAdmin,
+  upload.single('video'), // 👈 REQUIRED
+  videoController.updateVideo
+);
+
 
 /**
  * @swagger

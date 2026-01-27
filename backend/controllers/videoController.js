@@ -50,32 +50,39 @@ exports.createVideo = async (req, res) => {
   }
 };
 
-// Admin: Update video settings
 exports.updateVideo = async (req, res) => {
   try {
     const { id } = req.params;
-    const updates = req.body;
 
-    const video = await Video.findByIdAndUpdate(
-      id,
-      updates,
-      { new: true, runValidators: true }
-    );
-
+    const video = await Video.findById(id);
     if (!video) {
-      return res.status(404).json({ error: 'Video not found' });
+      return res.status(404).json({ error: "Video not found" });
     }
+
+    // Update text fields
+    if (req.body.title !== undefined) video.title = req.body.title;
+    if (req.body.description !== undefined) video.description = req.body.description;
+    if (req.body.moduleTitle !== undefined) video.moduleTitle = req.body.moduleTitle;
+    if (req.body.lessonNumber !== undefined) video.lessonNumber = req.body.lessonNumber;
+
+    // Replace video file ONLY if new file is uploaded
+    if (req.file) {
+      video.videoUrl = `http://localhost:5000/uploads/videos/${req.file.filename}`;
+      video.status = "ready";
+    }
+
+    await video.save();
 
     res.json({
       success: true,
-      message: 'Video updated successfully',
-      video
+      message: "Video updated successfully",
+      video,
     });
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // Admin: Delete video
 exports.deleteVideo = async (req, res) => {
@@ -194,7 +201,8 @@ exports.uploadVideo = async (req, res) => {
  const video = new Video({
   title,
   description,
-  videoUrl: `/uploads/videos/${req.file.filename}`,
+  videoUrl: `http://localhost:5000/uploads/videos/${req.file.filename}`,
+
 
   // ✅ THIS LINKS VIDEO TO COURSE
   courseUuid: course.uuid,

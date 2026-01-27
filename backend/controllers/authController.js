@@ -3,9 +3,10 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 // Register new user
+// Register new user (SECURE)
 exports.register = async (req, res) => {
   try {
-    const { email, password, fullName, role } = req.body;
+    const { email, password, fullName } = req.body;
 
     // Validate input
     if (!email || !password || !fullName) {
@@ -22,12 +23,12 @@ exports.register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Create user
+    // 🔒 FORCE ROLE
     const user = new User({
       email,
       passwordHash,
       fullName,
-      role: role || 'learner' // default to learner
+      role: 'learner', // 👈 nobody can change this
     });
 
     await user.save();
@@ -50,11 +51,11 @@ exports.register = async (req, res) => {
         role: user.role
       }
     });
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // Login user
 exports.login = async (req, res) => {
