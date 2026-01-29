@@ -11,7 +11,7 @@ exports.createBookmark = async (req, res) => {
     }
 
     const bookmark = new Bookmark({
-      userId: req.userId,
+      userId: req.user.id,
       videoId,
       timestampSeconds,
       label: label || ''
@@ -36,7 +36,7 @@ exports.getBookmarks = async (req, res) => {
     const { videoId } = req.params;
 
     const bookmarks = await Bookmark.find({
-      userId: req.userId,
+      userId: req.user.id,
       videoId
     }).sort({ timestampSeconds: 1 });
 
@@ -57,7 +57,7 @@ exports.deleteBookmark = async (req, res) => {
 
     const bookmark = await Bookmark.findOneAndDelete({
       _id: bookmarkId,
-      userId: req.userId
+      userId: req.user.id
     });
 
     if (!bookmark) {

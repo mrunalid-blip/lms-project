@@ -127,7 +127,7 @@ exports.getAllVideos = async (req, res) => {
 };
 
 
-// Get single video with user's progress
+// Get single video with user's progress (FIXED)
 exports.getVideoById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -139,25 +139,30 @@ exports.getVideoById = async (req, res) => {
       return res.status(404).json({ error: 'Video not found' });
     }
 
-    // Get user's progress if authenticated
     let progress = null;
-    if (req.userId) {
+
+    // ✅ FIX: correct user reference
+    if (req.user && req.user.id) {
       progress = await Progress.findOne({
-        userId: req.userId,
-        videoId: id
+        userId: req.user.id,
+        videoId: video._id
       });
     }
 
     res.json({
       success: true,
       video,
-      progress
+      progress: progress || {
+        lastPosition: 0,
+        completed: false
+      }
     });
 
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // Admin: Generate transcript (placeholder for AI integration)
 exports.generateTranscript = async (req, res) => {
@@ -187,7 +192,7 @@ const Course = require('../models/Course');
 
 exports.uploadVideo = async (req, res) => {
   try {
-    const { title, description, courseUuid, moduleTitle, lessonNumber } = req.body;
+    const { title, description, courseUuid, moduleTitle, lessonNumber, duration } = req.body;
 
     if (!req.file) {
       return res.status(400).json({ error: "Video file is required" });
@@ -202,6 +207,7 @@ exports.uploadVideo = async (req, res) => {
   title,
   description,
   videoUrl: `http://localhost:5000/uploads/videos/${req.file.filename}`,
+  duration: Number(duration) || 0,  
 
 
   // ✅ THIS LINKS VIDEO TO COURSE

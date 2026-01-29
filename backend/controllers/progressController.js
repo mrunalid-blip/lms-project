@@ -1,82 +1,97 @@
 const Progress = require('../models/Progress');
 const Video = require('../models/Video');
 
-// Update user's watch progress
+// ✅ Update watch progress (SECURE)
 exports.updateProgress = async (req, res) => {
   try {
     const { videoId } = req.params;
-    const { lastPosition, completed } = req.body;
+  const { lastPosition } = req.body;
 
-    // Check if video exists
     const video = await Video.findById(videoId);
     if (!video) {
       return res.status(404).json({ error: 'Video not found' });
     }
 
-    // Update or create progress
     let progress = await Progress.findOne({
-      userId: req.userId,
+      userId: req.user.id,
       videoId
     });
 
-    if (progress) {
-      progress.lastPosition = lastPosition;
-      progress.completed = completed || false;
-      progress.lastAccessed = new Date();
-    } else {
+    if (!progress) {
       progress = new Progress({
-        userId: req.userId,
-        videoId,
-        lastPosition,
-        completed: completed || false
+        userId: req.user.id,
+        videoId
       });
     }
 
+    // 🔒 Never allow backward cheating
+    progress.lastPosition = Math.max(
+      progress.lastPosition || 0,
+      Math.floor(lastPosition)
+    );
+
+   const duration = video.duration;
+
+// ✅ Force-watch logic (95%)
+if (video.forceWatch) {
+  if (progress.lastPosition >= duration * 0.95) {
+    progress.completed = true;
+  }
+} else {
+  progress.completed = true;
+}
+
+
+    progress.lastAccessed = new Date();
     await progress.save();
 
-    res.json({
-      success: true,
-      message: 'Progress updated',
-      progress
-    });
+  res.json({
+  success: true,
+  progress: {
+    lastPosition: progress.lastPosition,
+    completed: progress.completed,
+    lastAccessed: progress.lastAccessed
+  }
+});
 
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// Get user's progress for a video
+// ✅ Get progress for one video
 exports.getProgress = async (req, res) => {
   try {
     const { videoId } = req.params;
 
     const progress = await Progress.findOne({
-      userId: req.userId,
+      userId: req.user.id,
       videoId
     });
 
     res.json({
       success: true,
-      progress: progress || { lastPosition: 0, completed: false }
+      progress: progress || {
+        lastPosition: 0,
+        completed: false
+      }
     });
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// Get all user's progress
+// ✅ Get all progress of logged-in user
 exports.getAllProgress = async (req, res) => {
   try {
-    const progressList = await Progress.find({ userId: req.userId })
-      .populate('videoId', 'title thumbnailUrl duration')
+    const progressList = await Progress.find({
+      userId: req.user.id
+    })
+      .populate('videoId', 'title duration forceWatch courseUuid')
+
       .sort({ lastAccessed: -1 });
 
-    res.json({
-      success: true,
-      progressList
-    });
-
+    res.json({ success: true, progressList });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -11,7 +11,7 @@ exports.createNote = async (req, res) => {
     }
 
     const note = new Note({
-      userId: req.userId,
+      userId: req.user.id,
       videoId,
       timestampSeconds,
       noteText
@@ -36,7 +36,7 @@ exports.getNotes = async (req, res) => {
     const { videoId } = req.params;
 
     const notes = await Note.find({
-      userId: req.userId,
+      userId: req.user.id,
       videoId
     }).sort({ timestampSeconds: 1 });
 
@@ -57,7 +57,7 @@ exports.updateNote = async (req, res) => {
     const { noteText } = req.body;
 
     const note = await Note.findOneAndUpdate(
-      { _id: noteId, userId: req.userId },
+      { _id: noteId, userId: req.user.id },
       { noteText },
       { new: true }
     );
@@ -84,7 +84,7 @@ exports.deleteNote = async (req, res) => {
 
     const note = await Note.findOneAndDelete({
       _id: noteId,
-      userId: req.userId
+      userId: req.user.id
     });
 
     if (!note) {
