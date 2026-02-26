@@ -11,6 +11,7 @@ import noteService from "../services/noteService";
 import commentService from "../services/commentService";
 import VideoBottomTabs from "../components/video/VideoBottomTabs";
 import reactionService from "../services/reactionService";
+import VoiceAssistant from "../components/assistant/VoiceAssistant";
 
 function CourseLearning() {
   const { uuid }   = useParams();
@@ -18,6 +19,7 @@ function CourseLearning() {
 
   // ── Player ref — gives direct access to seekTo / changeQuality ──
   const playerRef = useRef(null);
+  
 
   const [course,           setCourse]           = useState(null);
   const [videos,           setVideos]           = useState([]);
@@ -213,6 +215,7 @@ function CourseLearning() {
     // playerRef.current.seekTo() is defined in VideoPlayer via
     // useImperativeHandle — no undefined ref errors possible here
     playerRef.current?.seekTo(timestampSeconds);
+    playerRef.current?.scrollIntoView();
   };
 
   const handleCreateBookmark = async () => {
@@ -671,6 +674,8 @@ function CourseLearning() {
           </div>
         )}
       </div>
+      {/* Voice Assistant */}
+<VoiceAssistant videoRef={playerRef} />
     </div>
   );
 }

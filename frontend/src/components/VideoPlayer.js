@@ -7,6 +7,7 @@ import {
 } from "react";
 import Hls from "hls.js";
 
+
 /**
  * SecureVideoPlayer (Optimized)
  *
@@ -35,37 +36,83 @@ const VideoPlayer = forwardRef(function VideoPlayer(
 
   const maxWatchedTimeRef = useRef(0);
   const lastSavedTimeRef = useRef(0);
+ const bypassSeekRestrictionRef = useRef(false);
+  const isSeekingRef = useRef(false);
 
   // ───────────────────────────────────────────────────────────
   // Expose methods to parent
   // ───────────────────────────────────────────────────────────
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      seekTo(seconds) {
-        const video = videoRef.current;
-        if (!video) return;
+ useImperativeHandle(
+  ref,
+  () => ({
+    play() {
+      videoRef.current?.play();
+    },
 
-        if (restrictForwardSeek && seconds > maxWatchedTimeRef.current) return;
+    pause() {
+      videoRef.current?.pause();
+    },
 
-        video.currentTime = seconds;
-      },
+    seekTo(seconds) {
+  const video = videoRef.current;
+  if (!video) return;
 
-      getCurrentTime() {
-        return videoRef.current
-          ? Math.floor(videoRef.current.currentTime)
-          : 0;
-      },
+  bypassSeekRestrictionRef.current = true; // allow this seek
 
-      changeQuality(levelIndex) {
-        if (hlsRef.current) {
-          hlsRef.current.currentLevel = levelIndex; // -1 = Auto
-        }
-      },
-    }),
-    [restrictForwardSeek]
-  );
+  video.currentTime = seconds;
+
+  setTimeout(() => {
+    bypassSeekRestrictionRef.current = false;
+  }, 300);
+},
+scrollIntoView() {
+  const video = videoRef.current;
+  if (!video) return;
+
+  video.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+},
+
+    forward(seconds = 10) {
+      videoRef.current.currentTime += seconds;
+    },
+
+    backward(seconds = 10) {
+      videoRef.current.currentTime -= seconds;
+    },
+
+    setPlaybackRate(rate) {
+      videoRef.current.playbackRate = rate;
+    },
+
+    mute() {
+      videoRef.current.muted = true;
+    },
+
+    unmute() {
+      videoRef.current.muted = false;
+    },
+
+    getDuration() {
+      return videoRef.current?.duration || 0;
+    },
+
+    getCurrentTime() {
+      return Math.floor(videoRef.current?.currentTime || 0);
+    },
+    
+
+    changeQuality(levelIndex) {
+      if (hlsRef.current) {
+        hlsRef.current.currentLevel = levelIndex;
+      }
+    },
+  }),
+  [restrictForwardSeek]
+);
 
   // ───────────────────────────────────────────────────────────
   // HLS Setup
@@ -141,24 +188,31 @@ const VideoPlayer = forwardRef(function VideoPlayer(
   // Optimized Progress Saving (NO FLOODING)
   // ───────────────────────────────────────────────────────────
 
-  const handleTimeUpdate = useCallback(() => {
-    const video = videoRef.current;
-    if (!video) return;
+const handleTimeUpdate = useCallback(() => {
+  const video = videoRef.current;
+  if (!video) return;
 
-    const currentTime = Math.floor(video.currentTime);
+  const current = video.currentTime;
 
-    // Track max reached
-    if (currentTime > maxWatchedTimeRef.current) {
-      maxWatchedTimeRef.current = currentTime;
-    }
+  // If we just corrected a seek, ignore this update
+  if (isSeekingRef.current) {
+    isSeekingRef.current = false;
+    return;
+  }
 
-    // Save only every SAVE_INTERVAL seconds
-    if (currentTime - lastSavedTimeRef.current >= SAVE_INTERVAL) {
-      lastSavedTimeRef.current = currentTime;
-      onProgress?.(currentTime);
-      onTimeUpdate?.(currentTime);
-    }
-  }, [onProgress, onTimeUpdate]);
+  // Only update max when playing forward normally
+  if (!video.seeking && current > maxWatchedTimeRef.current) {
+    maxWatchedTimeRef.current = current;
+  }
+
+  const floored = Math.floor(current);
+
+  if (floored - lastSavedTimeRef.current >= SAVE_INTERVAL) {
+    lastSavedTimeRef.current = floored;
+    onProgress?.(floored);
+    onTimeUpdate?.(floored);
+  }
+}, [onProgress, onTimeUpdate]);
 
   // ───────────────────────────────────────────────────────────
   // Save on Pause (Important)
@@ -177,18 +231,22 @@ const VideoPlayer = forwardRef(function VideoPlayer(
   // ───────────────────────────────────────────────────────────
   // Prevent Forward Seek (Force Watch)
   // ───────────────────────────────────────────────────────────
+const handleSeeking = useCallback(() => {
+  if (!restrictForwardSeek) return;
 
-  const handleSeeking = useCallback(() => {
-    if (!restrictForwardSeek) return;
+  const video = videoRef.current;
+  if (!video) return;
 
-    const video = videoRef.current;
-    if (!video) return;
+  if (bypassSeekRestrictionRef.current) return; // allow bookmark seeks
 
-    if (video.currentTime > maxWatchedTimeRef.current) {
-      video.currentTime = maxWatchedTimeRef.current;
-    }
-  }, [restrictForwardSeek]);
+  const attempted = video.currentTime;
+  const allowed = maxWatchedTimeRef.current;
 
+  if (attempted > allowed + 0.5) {
+    isSeekingRef.current = true;
+    video.currentTime = allowed;
+  }
+}, [restrictForwardSeek]);
   // ───────────────────────────────────────────────────────────
   // Save progress before leaving page
   // ───────────────────────────────────────────────────────────
