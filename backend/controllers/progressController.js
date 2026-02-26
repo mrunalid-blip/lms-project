@@ -1,63 +1,64 @@
 const Progress = require('../models/Progress');
 const Video = require('../models/Video');
 
-// ✅ Update watch progress (SECURE)
 exports.updateProgress = async (req, res) => {
   try {
     const { videoId } = req.params;
-  const { lastPosition } = req.body;
+    const { lastPosition } = req.body;
 
     const video = await Video.findById(videoId);
     if (!video) {
-      return res.status(404).json({ error: 'Video not found' });
+      return res.status(404).json({ error: "Video not found" });
     }
 
     let progress = await Progress.findOne({
       userId: req.user.id,
-      videoId
+      videoId,
     });
 
     if (!progress) {
       progress = new Progress({
         userId: req.user.id,
-        videoId
+        videoId,
+        lastPosition: 0,
+        completed: false,
       });
     }
 
-    // 🔒 Never allow backward cheating
+    const safeIncoming = Math.floor(lastPosition);
+
+    // 🔐 Allow only small forward jumps (anti cheat)
+    const allowedJump = 30; // seconds
+
+    if (safeIncoming > progress.lastPosition + allowedJump) {
+      return res.status(400).json({
+        error: "Progress jump too large",
+      });
+    }
+
+    // Never allow backward overwrite
     progress.lastPosition = Math.max(
-      progress.lastPosition || 0,
-      Math.floor(lastPosition)
+      progress.lastPosition,
+      safeIncoming
     );
 
-   const duration = video.duration;
-
-// ✅ Force-watch logic (95%)
-if (video.forceWatch) {
-  if (progress.lastPosition >= duration * 0.95) {
-    progress.completed = true;
-  }
-} else {
-  progress.completed = true;
-}
-
-
     progress.lastAccessed = new Date();
+
     await progress.save();
 
-  res.json({
-  success: true,
-  progress: {
-    lastPosition: progress.lastPosition,
-    completed: progress.completed,
-    lastAccessed: progress.lastAccessed
-  }
-});
-
+    res.json({
+      success: true,
+      progress: {
+        lastPosition: progress.lastPosition,
+        completed: progress.completed,
+        lastAccessed: progress.lastAccessed,
+      },
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // ✅ Get progress for one video
 exports.getProgress = async (req, res) => {

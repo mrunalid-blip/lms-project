@@ -18,6 +18,9 @@ const enrollmentRoutes = require("./routes/enrollments");
 const adminCourseRoutes = require("./routes/adminCourses");
 const adminUserRoutes = require("./routes/adminUsers");
 const commentRoutes = require("./routes/comments");
+const reactionRoutes = require("./routes/videoReaction.routes");
+const { auth } = require("./middleware/auth");
+
 
 const app = express();
 
@@ -36,16 +39,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 // ✅ Serve uploaded videos
-app.use(
-  "/uploads",
-  (req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Accept-Ranges", "bytes");
-    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-    next();
-  },
-  express.static(path.join(__dirname, "uploads")),
-);
+// 🔒 Secure HLS Streaming Folder
 
 // ✅ Swagger Docs
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -66,6 +60,8 @@ app.use("/api/enrollments", enrollmentRoutes);
 app.use("/api/admin", adminCourseRoutes);
 app.use("/api/admin", adminUserRoutes);
 app.use("/api/comments", commentRoutes);
+app.use("/api", reactionRoutes);
+
 
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });

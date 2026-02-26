@@ -18,33 +18,32 @@ async function importVideos() {
     console.log(`🎬 Found ${videos.length} videos`);
 
     for (const v of videos) {
+
       const course = await Course.findOne({ uuid: v.courseUuid });
       if (!course) {
         console.log(`❌ Course not found: ${v.courseUuid}`);
         continue;
       }
 
-   await Video.updateOne(
-  {
-    courseUuid: v.courseUuid,
-    lessonNumber: v.lessonNumber
-  },
+      // ✅ Folder name derived from filename
+      const folderName = v.videoFile.split(".")[0];
 
+      await Video.updateOne(
         {
-        $set: {
-  title: v.title,
-  description: v.description,
-  videoUrl: `http://localhost:5000/uploads/videos/${v.videoFile}`,
-  duration: v.duration,
-  moduleTitle: v.moduleTitle,
-
-  // ✅ THIS IS THE KEY
-  courseUuid: course.uuid,
-  courseName: course.course_name,
-
-  status: "ready"
-}
-
+          courseUuid: v.courseUuid,
+          lessonNumber: v.lessonNumber
+        },
+        {
+          $set: {
+            title: v.title,
+            description: v.description,
+            videoUrl: `/uploads/hls/${folderName}/index.m3u8`,
+            duration: v.duration,
+            moduleTitle: v.moduleTitle,
+            courseUuid: course.uuid,
+            courseName: course.course_name,
+            status: "ready"
+          }
         },
         { upsert: true }
       );

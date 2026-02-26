@@ -54,6 +54,17 @@ courseUuid: {
     type: Boolean,
     default: false
   },
+  // Watch Restriction (80% rule)
+requireWatchPercentage: {
+  type: Boolean,
+  default: false
+},
+
+minimumWatchPercent: {
+  type: Number,
+  default: 80
+},
+
   enableForum: {
     type: Boolean,
     default: true
