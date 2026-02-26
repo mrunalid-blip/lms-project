@@ -8,10 +8,15 @@ const videoSchema = new mongoose.Schema({
   description: {
     type: String
   },
-  videoUrl: {
-    type: String,
-    required: true
-  },
+videoUrl: {
+  type: String,
+  default: null
+},
+
+hlsFolder: {
+  type: String,
+  default: null
+},
   thumbnailUrl: {
     type: String
   },

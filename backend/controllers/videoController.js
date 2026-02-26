@@ -206,6 +206,10 @@ exports.createVideo = async (req, res) => {
 // ──────────────────────────────────────────────────────────────
 
 exports.uploadVideo = async (req, res) => {
+  console.log("====== UPLOAD DEBUG ======");
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+    console.log("USER:", req.user);
   try {
     const { title, description, courseUuid, moduleTitle, lessonNumber, duration } = req.body;
 

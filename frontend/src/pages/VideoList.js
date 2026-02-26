@@ -36,9 +36,15 @@ const loadCourses = useCallback(async () => {
 
     const progressMap = {};
     fullCourses.forEach((course) => {
-      const courseProgress = progressList.filter(
-        (p) => p.videoId.courseUuid === course.uuid && p.completed
-      );
+     const courseProgress = progressList.filter((p) => {
+  if (!p.videoId) return false;
+
+  return (
+    typeof p.videoId === "object" &&
+    p.videoId.courseUuid === course.uuid &&
+    p.completed
+  );
+});
 
       progressMap[course.uuid] = totalVideosMap[course.uuid]
         ? Math.round(
