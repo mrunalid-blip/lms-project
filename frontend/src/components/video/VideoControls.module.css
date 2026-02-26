@@ -1,0 +1,25 @@
+.controls {
+  position: absolute;
+   top: 16px;  /* above native controls */
+  right: 16px;
+  display: flex;
+  gap: 10px;
+  z-index: 20;
+}
+
+.controls button {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.controls button:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.05);
+}
+

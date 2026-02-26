@@ -1,0 +1,288 @@
+.container {
+  margin-top: 24px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 20px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 20px;
+}
+
+.tab,
+.tabActive {
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #606060;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  color: #1a1a1a;
+  background: #f5f5f5;
+}
+
+.tabActive {
+  color: #065fd4;
+  border-bottom-color: #065fd4;
+  font-weight: 600;
+}
+
+.content {
+  min-height: 300px;
+}
+
+/* Comments Tab */
+.commentsTab {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;     /* ⬅ reduced from 20 */
+}
+
+
+.addCommentSection {
+  background: #f9f9f9;
+  padding: 10px;      /* ⬅ from 16 */
+  border-radius: 8px;
+}
+
+
+.commentInput {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  background: white;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.commentInput:focus {
+  border-color: #065fd4;
+}
+
+.commentInput::placeholder {
+  color: #999;
+}
+
+.commentActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.cancelBtn,
+.postBtn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancelBtn {
+  background: transparent;
+  color: #666;
+}
+
+.cancelBtn:hover {
+  background: #e0e0e0;
+}
+
+.postBtn {
+  background: #065fd4;
+  color: white;
+}
+
+.postBtn:disabled {
+  background: #ccc;
+  color: #888;
+  cursor: not-allowed;
+}
+
+.postBtn:not(:disabled):hover {
+  background: #0553c4;
+}
+
+.commentsPlaceholder {
+  text-align: center;
+  padding: 12px 10px;
+  color: #999;
+}
+
+/* Notes Tab */
+.notesTab {
+  padding: 0;
+}
+
+.notesTextarea {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 300px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.notesTextarea:focus {
+  border-color: #065fd4;
+}
+
+.notesTextarea::placeholder {
+  color: #999;
+}
+
+/* Bookmarks Tab */
+.bookmarksTab {
+  padding: 0;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+}
+
+.addBookmarkBtn {
+  margin-top: 16px;
+  padding: 10px 24px;
+  background: #065fd4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.addBookmarkBtn:hover {
+  background: #0553c4;
+}
+
+.bookmarksList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.bookmarkItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bookmarkItem:hover {
+  background: #f5f5f5;
+  border-color: #065fd4;
+}
+
+.bookmarkIcon {
+  font-size: 18px;
+}
+
+.bookmarkLabel {
+  font-size: 14px;
+  color: #1a1a1a;
+}
+
+/* Q&A Tab */
+.qaTab {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.askQuestionSection {
+  background: #f9f9f9;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.questionInput {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  background: white;
+  outline: none;
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+
+.questionInput:focus {
+  border-color: #065fd4;
+}
+
+.questionInput::placeholder {
+  color: #999;
+}
+
+.askBtn {
+  padding: 10px 24px;
+  background: #065fd4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.askBtn:hover {
+  background: #0553c4;
+}
+
+.questionsPlaceholder {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tabs {
+    overflow-x: auto;
+  }
+
+  .tab,
+  .tabActive {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
+
+.commentAuthor {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 4px;
+}
