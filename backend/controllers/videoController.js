@@ -150,7 +150,7 @@ async function transcodeToHLS(videoId, inputPath, io = null) {
 
   writeMasterPlaylist(outputDir, completedVariants);
 
-  if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
+  
 
   await Video.findByIdAndUpdate(videoId, {
     videoUrl:            `/uploads/hls/${videoFolder}/master.m3u8`,
@@ -206,10 +206,7 @@ exports.createVideo = async (req, res) => {
 // ──────────────────────────────────────────────────────────────
 
 exports.uploadVideo = async (req, res) => {
-  console.log("====== UPLOAD DEBUG ======");
-    console.log("BODY:", req.body);
-    console.log("FILE:", req.file);
-    console.log("USER:", req.user);
+  
   try {
     const { title, description, courseUuid, moduleTitle, lessonNumber, duration } = req.body;
 
@@ -240,7 +237,13 @@ exports.uploadVideo = async (req, res) => {
 
     const io = req.app.get("io") || null;
 
-    transcodeToHLS(video._id, req.file.path, io).catch(async (err) => {
+   const originalsDir = path.join(__dirname, "..", "uploads", "originals");
+fs.mkdirSync(originalsDir, { recursive: true });
+
+const originalPath = path.join(originalsDir, `${video._id}.mp4`);
+fs.renameSync(req.file.path, originalPath);
+
+transcodeToHLS(video._id, originalPath, io) .catch(async (err) => {
       console.error(`Transcoding failed for video ${video._id}:`, err);
       await Video.findByIdAndUpdate(video._id, { status: "failed" });
       if (io) io.emit(`video:${video._id}:progress`, { status: "failed" });
